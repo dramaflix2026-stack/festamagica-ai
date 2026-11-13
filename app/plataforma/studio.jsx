@@ -29,7 +29,7 @@ export default function Studio({onGenerated}){
  const [date,setDate]=useState(''),[time,setTime]=useState(''),[venue,setVenue]=useState('');
  const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
  async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
-  try{const generated=await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress);setKit(generated);if(onGenerated)await onGenerated({nome:name,idade:Number(age),tema:theme,data_festa:date||null,horario:time||null,local_festa:venue||null,status:'gerado'});
+  try{const generated=await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress);setKit(generated);if(onGenerated)await onGenerated({nome:name,idade:Number(age),tema:theme,data_festa:date||null,horario:time||null,local_festa:venue||null,status:'gerado'},generated);
   }catch(e){setError(e.message||'Não foi possível gerar')}finally{setLoading(false)}
  }
  return <><header className="container nav"><a href="#" className="brand">festa<span>mágica</span> ✦</a><a className="navLink" href="#criar">Criar convite ✨</a></header>
