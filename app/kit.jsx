@@ -2,25 +2,16 @@
 import {useState} from 'react';
 export const pieceKeys=['convite','topper','tags','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
-export async function createKit(d,onProgress,onlyPiece=null){
+export async function createKit(d,onProgress){
  const kit={};
- const selected=onlyPiece?[onlyPiece]:pieceKeys;
- for(let i=0;i<selected.length;i++){
-  const piece=selected[i];onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/'+selected.length+')…');
-  const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece,page})});
-    const j=await r.json();if(!r.ok)throw Error('Bandeirolas página '+page+': '+(j.error||'Erro na geração'));
-    sourcePages.push(j.image);
-   }
-   onProgress?.('Padronizando tamanho e margens das bandeirolas…');
-   const [first,second]=await normalizePennantPages(sourcePages[0],sourcePages[1]);
-   kit['bandeirolas-pagina-1']=first;
-   kit['bandeirolas-pagina-2']=second;
-   onProgress?.('As duas páginas de bandeirolas foram concluídas');
-   continue;
-  }
+ for(let i=0;i<pieceKeys.length;i++){
+  const piece=pieceKeys[i];
+  onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/'+pieceKeys.length+')…');
   const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece})});
-  const j=await r.json();if(!r.ok)throw Error(labels[piece]+': '+(j.error||'Erro na geração'));
-  kit[piece]=j.image;onProgress?.('Arte '+(i+1)+' de '+selected.length+' concluída');
+  const j=await r.json();
+  if(!r.ok)throw Error(labels[piece]+': '+(j.error||'Erro na geração'));
+  kit[piece]=j.image;
+  onProgress?.('Arte '+(i+1)+' de '+pieceKeys.length+' concluída');
  }
  return kit;
 }
