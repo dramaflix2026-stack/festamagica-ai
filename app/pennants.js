@@ -4,21 +4,27 @@ function load(src){return new Promise((resolve,reject)=>{const img=new Image();i
 function flag(ctx,img,x,y,w,h,letter,index){
  const mid=x+w/2;
  ctx.save();
- ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h*.73);ctx.lineTo(mid,y+h);ctx.lineTo(x,y+h*.73);ctx.closePath();ctx.clip();
- // Preserve reference artwork as a background texture, then place exact lettering on a decorative panel.
- const sourceW=img.naturalWidth/5,sourceH=img.naturalHeight*.62;
- const sx=(index%5)*sourceW;
- ctx.drawImage(img,sx,0,sourceW,sourceH,x,y,w,h);
- const grad=ctx.createLinearGradient(x,y,x+w,y+h);
- grad.addColorStop(0,'#ffe4a2');grad.addColorStop(.5,'#f8cb70');grad.addColorStop(1,'#d69a48');
- ctx.fillStyle=grad;ctx.strokeStyle='#86502a';ctx.lineWidth=5;
- ctx.beginPath();ctx.roundRect(x+w*.13,y+h*.20,w*.74,h*.43,25);ctx.fill();ctx.stroke();
- ctx.font='bold '+(letter.length>2?68:145)+'px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';
- ctx.lineWidth=9;ctx.strokeStyle='#fff6dc';ctx.strokeText(letter,mid,y+h*.405,w*.67);
- ctx.fillStyle='#633718';ctx.fillText(letter,mid,y+h*.405,w*.67);
+ ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(mid,y+h);ctx.closePath();ctx.clip();
+ // Use the approved premium pennant image as the decoration; preserve animals and foliage.
+ // Original approved reference has five pennants across its upper row.
+ const sw=img.naturalWidth/5,sh=img.naturalHeight*.52;
+ ctx.drawImage(img,(index%5)*sw,0,sw,sh,x,y,w,h);
+ // Only soften the central lettering area, without a large opaque shield or card.
+ const gradient=ctx.createRadialGradient(mid,y+h*.39,w*.06,mid,y+h*.39,w*.42);
+ gradient.addColorStop(0,'rgba(255,238,179,.94)');
+ gradient.addColorStop(.55,'rgba(255,231,169,.62)');
+ gradient.addColorStop(1,'rgba(255,231,169,0)');
+ ctx.fillStyle=gradient;ctx.fillRect(x,y,w,h*.75);
+ ctx.textAlign='center';ctx.textBaseline='middle';
+ const isAge=letter.length>2;
+ ctx.font='bold '+(isAge?68:155)+'px Georgia';
+ ctx.lineJoin='round';ctx.lineWidth=isAge?8:12;
+ ctx.strokeStyle='#fff6db';ctx.strokeText(letter,mid,y+h*.36,w*.78);
+ ctx.fillStyle='#70401e';ctx.fillText(letter,mid,y+h*.36,w*.78);
  ctx.restore();
- ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h*.73);ctx.lineTo(mid,y+h);ctx.lineTo(x,y+h*.73);ctx.closePath();ctx.strokeStyle='#f5dba4';ctx.lineWidth=8;ctx.stroke();
- ctx.strokeStyle='#477c31';ctx.lineWidth=3;ctx.stroke();
+ ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(mid,y+h);ctx.closePath();
+ ctx.strokeStyle='#fff7e8';ctx.lineWidth=9;ctx.stroke();
+ ctx.strokeStyle='#659044';ctx.lineWidth=3;ctx.stroke();
 }
 export async function buildPennants(source,d){
  const img=await load(source);
