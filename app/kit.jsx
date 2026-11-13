@@ -1,6 +1,5 @@
 'use client';
 import {useState} from 'react';
-import {buildPennants} from './pennants';
 export const pieceKeys=['convite','topper','tags','bandeirolas','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',bandeirolas:'Bandeirolas',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
 export async function createKit(d,onProgress){
@@ -9,7 +8,7 @@ export async function createKit(d,onProgress){
   const piece=pieceKeys[i];onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/6)…');
   const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece})});
   const j=await r.json();if(!r.ok)throw Error(labels[piece]+': '+(j.error||'Erro na geração'));
-  kit[piece]=piece==='bandeirolas'?await buildPennants(j.image,d):j.image;onProgress?.('Arte '+(i+1)+' de 6 concluída');
+  kit[piece]=j.image;onProgress?.('Arte '+(i+1)+' de 6 concluída');
  }
  return kit;
 }
