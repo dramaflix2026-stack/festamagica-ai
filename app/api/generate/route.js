@@ -33,19 +33,20 @@ export async function POST(request){
  // Never send private customer data to a remote reference URL.
  const referenceFile=d.theme==='safari'?'/references/safari-premium.png':null;
  let response;
- if(referenceFile){
+ if(referenceFile||d.referenceImage){
   try{
    const origin=new URL(request.url).origin;
-   const refResponse=await fetch(origin+referenceFile,{signal:AbortSignal.timeout(8000)});
-   if(refResponse.ok&&refResponse.headers.get('content-type')?.startsWith('image/')){
-    const bytes=await refResponse.arrayBuffer();
+   const refResponse=d.referenceImage?null:await fetch(origin+referenceFile,{signal:AbortSignal.timeout(8000)});
+   if(d.referenceImage||refResponse?.ok&&refResponse.headers.get('content-type')?.startsWith('image/')){
+    const uploaded=typeof d.referenceImage==='string'&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(d.referenceImage)&&d.referenceImage.length<8_000_000?d.referenceImage:null;
+    const bytes=uploaded?Uint8Array.from(atob(uploaded.split(',')[1]),c=>c.charCodeAt(0)).buffer:await refResponse.arrayBuffer();
     if(bytes.byteLength>0&&bytes.byteLength<10_000_000){
      const form=new FormData();
      form.append('model',model);
      form.append('prompt',prompt+'\\nVISUAL REFERENCE: use the uploaded image ONLY for artistic direction, lighting, palette, and character quality. Produce the specified distinct printable piece, not a duplicate.');
      form.append('size',piece.size);
      form.append('quality','low');
-     form.append('image',new Blob([bytes],{type:refResponse.headers.get('content-type')?.split(';')[0]||'image/png'}),'reference.png');
+     form.append('image',new Blob([bytes],{type:uploaded?uploaded.slice(5,uploaded.indexOf(';')):refResponse.headers.get('content-type')?.split(';')[0]||'image/png'}),'reference.png');
      response=await fetch('https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:'Bearer '+apiKey},body:form,signal:AbortSignal.timeout(115000)});
     }
    }
