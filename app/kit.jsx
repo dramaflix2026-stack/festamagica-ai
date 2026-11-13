@@ -1,6 +1,6 @@
 'use client';
 import {useState} from 'react';
-import {pennantSheet16x9} from './pennant-export';
+import {pennantSheet16x9,normalizePennantPages} from './pennant-export';
 export const pieceKeys=['convite','topper','tags','bandeirolas','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',bandeirolas:'Bandeirolas', 'bandeirolas-pagina-1':'Bandeirolas — página 1 (S O F I)', 'bandeirolas-pagina-2':'Bandeirolas — página 2 (A + 5 ANOS)',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
 export async function createKit(d,onProgress,onlyPiece=null){
@@ -9,12 +9,17 @@ export async function createKit(d,onProgress,onlyPiece=null){
  for(let i=0;i<selected.length;i++){
   const piece=selected[i];onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/'+selected.length+')…');
   if(piece==='bandeirolas'&&d.theme==='safari'){
+   const sourcePages=[];
    for(const page of [1,2]){
     onProgress?.('Criando bandeirolas — página '+page+' de 2…');
     const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece,page})});
     const j=await r.json();if(!r.ok)throw Error('Bandeirolas página '+page+': '+(j.error||'Erro na geração'));
-    kit['bandeirolas-pagina-'+page]=await pennantSheet16x9(j.image);
+    sourcePages.push(j.image);
    }
+   onProgress?.('Padronizando tamanho e margens das bandeirolas…');
+   const [first,second]=await normalizePennantPages(sourcePages[0],sourcePages[1]);
+   kit['bandeirolas-pagina-1']=first;
+   kit['bandeirolas-pagina-2']=second;
    onProgress?.('As duas páginas de bandeirolas foram concluídas');
    continue;
   }
