@@ -1,6 +1,7 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {referenceFor} from './references';
+import {themeById} from '../../themes';
 import {NextResponse} from 'next/server';
 export const runtime='nodejs';
 const themes={
@@ -23,14 +24,14 @@ export async function POST(request){
  if(!apiKey||!code)return NextResponse.json({error:'Configure a chave da OpenAI e o código de teste.'},{status:503});
  const d=await request.json();if(d.code!==code)return NextResponse.json({error:'Código de teste inválido.'},{status:403});
  const name=String(d.name||'').trim(),age=Number(d.age),piece=pieces[d.piece];
- if(!/^[\p{L}\p{M} '’-]{2,35}$/u.test(name)||!Number.isInteger(age)||age<1||age>99||!themes[d.theme]||!piece)return NextResponse.json({error:'Dados inválidos.'},{status:400});
+ if(!/^[\p{L}\p{M} '’-]{2,35}$/u.test(name)||!Number.isInteger(age)||age<1||age>99||!themeById[d.theme]||!piece)return NextResponse.json({error:'Dados inválidos.'},{status:400});
  const ip=request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown',now=Date.now(),record=limiter.get(ip)||{at:now,count:0};
  if(now-record.at>3600000){record.at=now;record.count=0;}
  if(record.count>=MAX)return NextResponse.json({error:'Limite de 12 artes por hora atingido.'},{status:429});
  record.count++;limiter.set(ip,record);if(limiter.size>10000)limiter.clear();
  const date=String(d.date||'').slice(0,10),time=String(d.time||'').slice(0,5),venue=String(d.venue||'').slice(0,80);
  const formatted=/^\d{4}-\d\d-\d\d$/.test(date)?date.split('-').reverse().join('/'):'a confirmar';
- const prompt=['Create ONE premium high-end colorful 3D cartoon birthday party illustration, not a mockup.','Theme:',themes[d.theme],piece.instruction,'High artistic detail, vibrant saturated colors, dimensional lighting, adorable polished expressive animals, sophisticated professional composition, precise proportions.','ABSOLUTE RULE: Do not draw ANY text, lettering, typography, digits, glyphs, pseudo-text, watermarks, or logos. ALL writing is applied separately by software.','The illustration must look finished and premium even with its reserved typography areas. Do not draw placeholder rectangles or generic boxes.'].join('\\n');
+ const prompt=['Create ONE premium high-end colorful 3D cartoon birthday party illustration, not a mockup.','Theme:',(themes[d.theme]||('High-quality colorful polished birthday party artwork featuring the theme '+themeById[d.theme].name+', in the category '+themeById[d.theme].category+'. Create recognizable themed visual motifs and appropriate scenery. For named copyrighted characters or brands, use only original generic genre elements unless licensed reference assets are supplied.')),piece.instruction,'High artistic detail, vibrant saturated colors, dimensional lighting, adorable polished expressive animals, sophisticated professional composition, precise proportions.','ABSOLUTE RULE: Do not draw ANY text, lettering, typography, digits, glyphs, pseudo-text, watermarks, or logos. ALL writing is applied separately by software.','The illustration must look finished and premium even with its reserved typography areas. Do not draw placeholder rectangles or generic boxes.'].join('\\n');
  const hasReference=Boolean(referenceFor(d.theme,d.piece));
  const editInstructions={
   convite:'Keep the original invitation layout, all characters, ornamentation, borders and typography hierarchy. Replace the birthday name, age, date, time and location with the exact supplied values. Preserve legibility and spacing.',
