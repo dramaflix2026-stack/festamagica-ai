@@ -3,6 +3,8 @@ import {useState} from 'react';
 import KitGallery,{createKit} from '../kit';
 import FreePreview from '../free-preview';
 import SheetTester from '../sheet-tester';
+import {composeFive} from '../universal-kit';
+import {getSession} from '../auth-client';
 import {partyThemes,partyCategories} from '../themes';
 
 function addText(background,details){
@@ -32,7 +34,13 @@ export default function Studio({onGenerated}){
  const [showFreePreview,setShowFreePreview]=useState(false);
  const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
  async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
-  try{const generated=await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress);setKit(generated);if(onGenerated)await onGenerated({nome:name,idade:Number(age),tema:theme,data_festa:date||null,horario:time||null,local_festa:venue||null,status:'gerado'},generated);
+  try{let generated;
+   if(theme==='dinossauros'){
+    setProgress('Gerando uma única ilustração do tema…');
+    const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(getSession()?.access_token||'')},body:JSON.stringify({name,age:Number(age),theme,date,time,venue,code,piece:'digital'})});
+    const data=await response.json();if(!response.ok)throw Error(data.error||'Falha ao gerar ilustração');
+    generated=await composeFive(data.image,{name,age:Number(age),date,time,venue},setProgress);
+   }else generated=await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress);setKit(generated);if(onGenerated)await onGenerated({nome:name,idade:Number(age),tema:theme,data_festa:date||null,horario:time||null,local_festa:venue||null,status:'gerado'},generated);
   }catch(e){setError(e.message||'Não foi possível gerar')}finally{setLoading(false)}
  }
  return <><header className="container nav"><a href="#" className="brand">festa<span>mágica</span> ✦</a><a className="navLink" href="#criar">Criar convite ✨</a></header>
