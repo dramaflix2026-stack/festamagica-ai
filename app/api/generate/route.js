@@ -1,3 +1,5 @@
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
 import {referenceFor} from './references';
 import {NextResponse} from 'next/server';
 export const runtime='nodejs';
@@ -47,17 +49,15 @@ export async function POST(request){
  let response;
  if(referenceFile){
   try{
-   const origin=new URL(request.url).origin;
-   const refResponse=await fetch(origin+referenceFile,{signal:AbortSignal.timeout(8000)});
-   if(refResponse.ok&&/^image\/(png|jpeg|webp)/.test(refResponse.headers.get('content-type')||'')){
-    const bytes=await refResponse.arrayBuffer();
-    if(bytes.byteLength>0&&bytes.byteLength<10_000_000){
+   const referencePath=path.join(process.cwd(),'public',decodeURIComponent(referenceFile).replace(/^\\/+/,''));
+   const bytes=await readFile(referencePath);
+   if(bytes.byteLength>0&&bytes.byteLength<10_000_000){
      const form=new FormData();
      form.append('model',model);
      form.append('prompt',referencePrompt);
      form.append('size',piece.size);
      form.append('quality',process.env.OPENAI_REFERENCE_QUALITY||'medium');
-     form.append('image',new Blob([bytes],{type:refResponse.headers.get('content-type')?.split(';')[0]||'image/png'}),'reference.png');
+     form.append('image',new Blob([bytes],{type:referencePath.toLowerCase().endsWith('.jpg')||referencePath.toLowerCase().endsWith('.jpeg')?'image/jpeg':'image/png'}),'reference.png');
      response=await fetch('https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:'Bearer '+apiKey},body:form,signal:AbortSignal.timeout(115000)});
     }
    }
