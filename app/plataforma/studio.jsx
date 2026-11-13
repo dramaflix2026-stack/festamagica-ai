@@ -1,6 +1,7 @@
 'use client';
 import {useState} from 'react';
 import KitGallery,{createKit} from '../kit';
+import FreePreview from '../free-preview';
 import {partyThemes,partyCategories} from '../themes';
 
 function addText(background,details){
@@ -27,6 +28,7 @@ export default function Studio({onGenerated}){
  const filteredThemes=partyThemes.filter(t=>(themeCategory==='Todos'||t.category===themeCategory)&&t.name.toLocaleLowerCase('pt-BR').includes(themeSearch.toLocaleLowerCase('pt-BR')));
  const visibleThemes=showAllThemes||themeSearch||themeCategory!=='Todos'?filteredThemes:filteredThemes.slice(0,12);
  const [date,setDate]=useState(''),[time,setTime]=useState(''),[venue,setVenue]=useState('');
+ const [showFreePreview,setShowFreePreview]=useState(false);
  const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
  async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
   try{const generated=await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress);setKit(generated);if(onGenerated)await onGenerated({nome:name,idade:Number(age),tema:theme,data_festa:date||null,horario:time||null,local_festa:venue||null,status:'gerado'},generated);
@@ -56,11 +58,12 @@ export default function Studio({onGenerated}){
  <div className="field"><label htmlFor="dia">Data (opcional)</label><input id="dia" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
  <div className="field"><label htmlFor="hora">Horário (opcional)</label><input id="hora" type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
  <div className="field"><label htmlFor="local">Local (opcional)</label><input id="local" maxLength={80} placeholder="Ex.: Salão de festas" value={venue} onChange={e=>setVenue(e.target.value)}/></div>
+ <button type="button" className="outline" style={{width:'100%',margin:'8px 0 18px'}} onClick={()=>setShowFreePreview(v=>!v)}>{showFreePreview?'Ocultar prévia gratuita':'👁️ Pré-visualizar sem gastar IA — grátis'}</button>
  <div className="price">🎁 Kit de lançamento: <strong>R$ 39,90</strong><div className="muted">Checkout ainda não habilitado. Estamos validando as cinco artes antes do lançamento.</div></div>
  <div className="field"><label htmlFor="code">Código de teste privado</label><input id="code" required type="password" autoComplete="off" placeholder="Código configurado no Railway" value={code} onChange={e=>setCode(e.target.value)}/></div>
  <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading?(progress||'Criando sua arte… ✨'):'Gerar kit de teste ✨'}</button>
  {error&&<p role="alert" className="error">{error}</p>}<p className="muted">Teste privado sem pagamento. O kit completo gera cinco artes.</p></form>
- <div className={'preview '+(kit?'previewKit':'')}>{kit?<KitGallery kit={kit} name={name} onReset={()=>setKit(null)}/>:result?<div className="rendered"><img src={result} alt={'Convite personalizado de '+name}/><div className="actions"><a className="btn" href={result} download="meu-convite-festamagica.png">Baixar PNG ↓</a><button type="button" className="outline" onClick={()=>setResult('')}>Criar outro</button></div></div>
+ <div className={'preview '+(kit?'previewKit':'')}>{showFreePreview&&!kit&&!loading?<FreePreview theme={theme} name={name} age={age} date={date} time={time} venue={venue}/>:kit?<KitGallery kit={kit} name={name} onReset={()=>setKit(null)}/>:result?<div className="rendered"><img src={result} alt={'Convite personalizado de '+name}/><div className="actions"><a className="btn" href={result} download="meu-convite-festamagica.png">Baixar PNG ↓</a><button type="button" className="outline" onClick={()=>setResult('')}>Criar outro</button></div></div>
  :<div className="placeholder"><div>🎈</div><h3>{loading?'A magia está acontecendo…':'Sua criação aparece aqui'}</h3><p>{loading?'Gerando sua arte personalizada. Isso pode levar alguns minutos.':'Preencha o formulário, escolha um tema e veja seu kit de festa nascer.'}</p></div>}</div></div></section>
  <section className="banner"><div className="container"><h2 className="sectionTitle">Um aniversário, mil lembranças.</h2><p className="sub">Convite, topper, tags, placa de boas-vindas e arte digital em uma só identidade.</p><a href="#criar" className="btn">Experimentar agora ✨</a></div></section></main>
  <footer className="footer">FestaMágica AI · Celebre os momentos especiais. ✨</footer></>;
