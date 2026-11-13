@@ -23,12 +23,9 @@ function addText(background,details){
 export default function Home(){
  const [name,setName]=useState(''),[age,setAge]=useState(''),[theme,setTheme]=useState('safari');
  const [date,setDate]=useState(''),[time,setTime]=useState(''),[venue,setVenue]=useState('');
- const [code,setCode]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
- async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);
-  try{const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,age:Number(age),theme,code})});
-  const j=await r.json();if(!r.ok)throw Error(j.error||'Falha ao gerar');
-  const formatted=date?date.split('-').reverse().join('/'):'';
-  setKit(await createKit(j.image,{name,age,date,time,venue,theme}));
+ const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
+ async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
+  try{setKit(await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress));
   }catch(e){setError(e.message||'Não foi possível gerar')}finally{setLoading(false)}
  }
  return <><header className="container nav"><a href="#" className="brand">festa<span>mágica</span> ✦</a><a className="navLink" href="#criar">Criar convite ✨</a></header>
@@ -49,10 +46,10 @@ export default function Home(){
  <div className="field"><label htmlFor="local">Local (opcional)</label><input id="local" maxLength={80} placeholder="Ex.: Salão de festas" value={venue} onChange={e=>setVenue(e.target.value)}/></div>
  <div className="price">🎁 Kit de lançamento: <strong>R$ 39,90</strong><div className="muted">Checkout ainda não habilitado. Estamos testando a qualidade das seis artes.</div></div>
  <div className="field"><label htmlFor="code">Código de teste privado</label><input id="code" required type="password" autoComplete="off" placeholder="Código configurado no Railway" value={code} onChange={e=>setCode(e.target.value)}/></div>
- <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading?'Criando a magia… ✨':'Gerar kit de teste ✨'}</button>
- {error&&<p role="alert" className="error">{error}</p>}<p className="muted">Teste privado sem pagamento. Limite de uso para controlar os custos da API.</p></form>
+ <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading?'{progress||'Criando as seis artes… ✨'}':'Gerar kit de teste ✨'}</button>
+ {error&&<p role="alert" className="error">{error}</p>}<p className="muted">Teste privado sem pagamento. Cada kit completo consome seis gerações de imagem.</p></form>
  <div className={'preview '+(kit?'previewKit':'')}>{kit?<KitGallery kit={kit} name={name} onReset={()=>setKit(null)}/>:result?<div className="rendered"><img src={result} alt={'Convite personalizado de '+name}/><div className="actions"><a className="btn" href={result} download="meu-convite-festamagica.png">Baixar PNG ↓</a><button type="button" className="outline" onClick={()=>setResult('')}>Criar outro</button></div></div>
- :<div className="placeholder"><div>🎈</div><h3>{loading?'A magia está acontecendo…':'Sua criação aparece aqui'}</h3><p>{loading?'Criando um fundo ilustrado e aplicando os detalhes do convite.':'Preencha o formulário, escolha um tema e veja seu kit de festa nascer.'}</p></div>}</div></div></section>
+ :<div className="placeholder"><div>🎈</div><h3>{loading?'A magia está acontecendo…':'Sua criação aparece aqui'}</h3><p>{loading?'Gerando seis composições individuais. Isso pode levar alguns minutos.':'Preencha o formulário, escolha um tema e veja seu kit de festa nascer.'}</p></div>}</div></div></section>
  <section className="banner"><div className="container"><h2 className="sectionTitle">Um aniversário, mil lembranças.</h2><p className="sub">Convite, topper, tags, bandeirolas, placa de boas-vindas e arte digital em uma só identidade.</p><a href="#criar" className="btn">Experimentar agora ✨</a></div></section></main>
  <footer className="footer">FestaMágica AI · Celebre os momentos especiais. ✨</footer></>;
 }
