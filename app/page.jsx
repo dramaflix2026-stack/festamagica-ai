@@ -1,7 +1,8 @@
 'use client';
 import {useState} from 'react';
 import KitGallery,{createKit} from './kit';
-const themes=[{id:'safari',name:'Safari',emoji:'🦁'},{id:'espaco',name:'Espaço',emoji:'🚀'},{id:'jardim',name:'Jardim',emoji:'🦋'}];
+import {partyThemes,partyCategories} from './themes';
+
 function addText(background,details){
  return new Promise((resolve,reject)=>{
   const img=new Image();img.onload=()=>{
@@ -22,6 +23,9 @@ function addText(background,details){
 }
 export default function Home(){
  const [name,setName]=useState(''),[age,setAge]=useState(''),[theme,setTheme]=useState('safari');
+ const [themeSearch,setThemeSearch]=useState(''),[themeCategory,setThemeCategory]=useState('Todos'),[showAllThemes,setShowAllThemes]=useState(false);
+ const filteredThemes=partyThemes.filter(t=>(themeCategory==='Todos'||t.category===themeCategory)&&t.name.toLocaleLowerCase('pt-BR').includes(themeSearch.toLocaleLowerCase('pt-BR')));
+ const visibleThemes=showAllThemes||themeSearch||themeCategory!=='Todos'?filteredThemes:filteredThemes.slice(0,12);
  const [date,setDate]=useState(''),[time,setTime]=useState(''),[venue,setVenue]=useState('');
  const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
  async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
@@ -40,7 +44,15 @@ export default function Home(){
  <div className="studio"><form className="panel" onSubmit={generate}><h3>Personalize sua festa</h3><p>Um pouquinho de informação e muita magia.</p>
  <div className="field"><label htmlFor="nome">Nome do aniversariante</label><input id="nome" required maxLength={35} placeholder="Ex.: Sofia" value={name} onChange={e=>setName(e.target.value)}/></div>
  <div className="field"><label htmlFor="idade">Idade</label><input id="idade" required type="number" min="1" max="99" placeholder="Ex.: 5" value={age} onChange={e=>setAge(e.target.value)}/></div>
- <div className="field"><label>Tema da festa</label><div className="themes">{themes.map(t=><button key={t.id} type="button" className={'theme '+(t.id===theme?'active':'')} onClick={()=>setTheme(t.id)}>{t.emoji}<br/>{t.name}</button>)}</div></div>
+ <div className="field"><label htmlFor="themeSearch">Tema da festa — {partyThemes.length} opções</label>
+ <input id="themeSearch" placeholder="Buscar personagem, time, princesa, safari..." value={themeSearch} onChange={e=>{setThemeSearch(e.target.value);setShowAllThemes(true)}}/>
+ <select className="themeCategory" aria-label="Categoria dos temas" value={themeCategory} onChange={e=>{setThemeCategory(e.target.value);setShowAllThemes(true)}}>{partyCategories.map(c=><option key={c} value={c}>{c}</option>)}</select>
+ <div className="themeSelection">Tema escolhido: <strong>{partyThemes.find(t=>t.id===theme)?.name}</strong></div>
+ <div className="themeCatalog">{visibleThemes.map(t=><button key={t.id} type="button" className={'themeTile '+(t.id===theme?'active':'')} onClick={()=>setTheme(t.id)} aria-pressed={t.id===theme}><span aria-hidden="true">{t.emoji}</span><small>{t.name}</small></button>)}</div>
+ {!showAllThemes&&filteredThemes.length>visibleThemes.length&&<button className="themeMore" type="button" onClick={()=>setShowAllThemes(true)}>Ver todos os {partyThemes.length} temas ↓</button>}
+ {filteredThemes.length===0&&<p className="muted">Nenhum tema encontrado. Experimente outra busca.</p>}
+ <p className="muted">Personagens e marcas são opções de teste. Artes comerciais com personagens protegidos exigem autorização dos titulares.</p>
+ </div>
  <div className="field"><label htmlFor="dia">Data (opcional)</label><input id="dia" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
  <div className="field"><label htmlFor="hora">Horário (opcional)</label><input id="hora" type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
  <div className="field"><label htmlFor="local">Local (opcional)</label><input id="local" maxLength={80} placeholder="Ex.: Salão de festas" value={venue} onChange={e=>setVenue(e.target.value)}/></div>
