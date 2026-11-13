@@ -1,5 +1,5 @@
-export const supabaseUrl='https://gpgqusslfxqjmynwxjvm.supabase.co';
-export const supabaseKey='sb_publishable_J3udgBeDVnB5QLOtx5WWvg_cOIbeWg8';
+export const supabaseUrl=process.env.NEXT_PUBLIC_SUPABASE_URL||'https://gpgqusslfxqjmynwxjvm.supabase.co';
+export const supabaseKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY||'sb_publishable_J3udgBeDVnB5QLOtx5WWvg_cOIbeWg8';
 const storageKey='festamagica-auth';
 export function getSession(){try{return JSON.parse(localStorage.getItem(storageKey)||'null')}catch{return null}}
 export function saveSession(data){if(data?.access_token)localStorage.setItem(storageKey,JSON.stringify(data))}
