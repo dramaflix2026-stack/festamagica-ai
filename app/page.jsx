@@ -23,11 +23,9 @@ function addText(background,details){
 export default function Home(){
  const [name,setName]=useState(''),[age,setAge]=useState(''),[theme,setTheme]=useState('safari');
  const [date,setDate]=useState(''),[time,setTime]=useState(''),[venue,setVenue]=useState('');
- const [referenceImage,setReferenceImage]=useState(''),[referenceName,setReferenceName]=useState('');
- async function chooseReference(e){const file=e.target.files?.[0];if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>8_000_000){setError('Escolha PNG, JPG ou WebP de até 8 MB.');return;}try{const src=await new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=()=>resolve(rd.result);rd.onerror=reject;rd.readAsDataURL(file);});const im=new Image();im.src=src;await im.decode();const cv=document.createElement('canvas');const scale=Math.min(1,1024/Math.max(im.width,im.height));cv.width=Math.round(im.width*scale);cv.height=Math.round(im.height*scale);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);setReferenceImage(cv.toDataURL('image/jpeg',.82));setReferenceName(file.name);setError('');}catch{setError('Não foi possível abrir a imagem de referência.');}}
  const [code,setCode]=useState(''),[progress,setProgress]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState(''),[kit,setKit]=useState(null),[error,setError]=useState('');
  async function generate(e){e.preventDefault();setLoading(true);setError('');setResult('');setKit(null);setProgress('');
-  try{setKit(await createKit({name,age:Number(age),theme,date,time,venue,code,referenceImage},setProgress));
+  try{setKit(await createKit({name,age:Number(age),theme,date,time,venue,code},setProgress));
   }catch(e){setError(e.message||'Não foi possível gerar')}finally{setLoading(false)}
  }
  return <><header className="container nav"><a href="#" className="brand">festa<span>mágica</span> ✦</a><a className="navLink" href="#criar">Criar convite ✨</a></header>
@@ -46,7 +44,6 @@ export default function Home(){
  <div className="field"><label htmlFor="dia">Data (opcional)</label><input id="dia" type="date" value={date} onChange={e=>setDate(e.target.value)}/></div>
  <div className="field"><label htmlFor="hora">Horário (opcional)</label><input id="hora" type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
  <div className="field"><label htmlFor="local">Local (opcional)</label><input id="local" maxLength={80} placeholder="Ex.: Salão de festas" value={venue} onChange={e=>setVenue(e.target.value)}/></div>
- <div className="field"><label htmlFor="referencia">Imagem de referência visual (opcional)</label><input id="referencia" type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseReference}/><p className="muted">{referenceName?`Referência selecionada: ${referenceName}`:"Envie uma das artes premium aprovadas para orientar o estilo das seis peças."}</p>{referenceImage&&<button type="button" className="outline" onClick={()=>{setReferenceImage("");setReferenceName("");}}>Remover referência</button>}</div>
  <div className="price">🎁 Kit de lançamento: <strong>R$ 39,90</strong><div className="muted">Checkout ainda não habilitado. Estamos testando a qualidade das seis artes.</div></div>
  <div className="field"><label htmlFor="code">Código de teste privado</label><input id="code" required type="password" autoComplete="off" placeholder="Código configurado no Railway" value={code} onChange={e=>setCode(e.target.value)}/></div>
  <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading?(progress||'Criando as seis artes… ✨'):'Gerar kit de teste ✨'}</button>
