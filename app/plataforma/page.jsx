@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {authRequest,currentUser,getSession,refreshSession,saveSession,signOut} from '../auth-client';
-import Studio from './studio';
+import CustomerArea from './customer-area';
 export default function Plataforma(){
  const [user,setUser]=useState(null),[checking,setChecking]=useState(true),[mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  useEffect(()=>{(async()=>{try{const hash=new URLSearchParams(window.location.hash.slice(1));if(hash.get('access_token')){saveSession({access_token:hash.get('access_token'),refresh_token:hash.get('refresh_token'),expires_in:Number(hash.get('expires_in')||3600),token_type:'bearer'});window.history.replaceState(null,'',window.location.pathname)}let s=getSession();if(!s)return;try{setUser(await currentUser(s.access_token))}catch{ s=await refreshSession(s);setUser(await currentUser(s.access_token))}}catch{signOut()}finally{setChecking(false)}})()},[]);
@@ -10,6 +10,6 @@ export default function Plataforma(){
   else{const j=await authRequest('token?grant_type=password',{email,password});saveSession(j);setUser(j.user)}
  }catch(e){setError(e.message)}finally{setBusy(false)}}
  if(checking)return <main className="authShell"><p>Verificando acesso…</p></main>;
- if(user)return <><div className="accountBar"><span>✨ FestaMágica · Área do cliente</span><span>{user.email} <button type="button" onClick={()=>{signOut();setUser(null)}}>Sair</button></span></div><Studio/></>;
+ if(user)return <CustomerArea user={user} onLogout={()=>{signOut();setUser(null)}}/>;
  return <main className="authShell"><div className="authPanel"><a className="brand" href="/">festa<span>mágica</span> ✦</a><h1>{mode==='login'?'Entrar na plataforma':'Criar minha conta'}</h1><p>Seu espaço para personalizar e baixar as artes da sua festa.</p><form onSubmit={submit}><label htmlFor="email">E-mail</label><input id="email" type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="voce@email.com"/><label htmlFor="password">Senha</label><input id="password" type="password" autoComplete={mode==='register'?'new-password':'current-password'} required minLength={6} value={password} onChange={e=>setPassword(e.target.value)} placeholder="Mínimo de 6 caracteres"/><button className="btn" type="submit" disabled={busy}>{busy?'Aguarde…':mode==='login'?'Entrar':'Cadastrar grátis'}</button></form>{error&&<p className="error" role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}<button className="authSwitch" onClick={()=>{setMode(mode==='login'?'register':'login');setError('');setNotice('')}}>{mode==='login'?'Ainda não tem conta? Cadastre-se':'Já tem conta? Fazer login'}</button><a href="/" className="backHome">← Voltar ao site</a></div></main>
 }
