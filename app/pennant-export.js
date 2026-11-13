@@ -32,25 +32,13 @@ function flag(ctx,img,index,label,x,y,w,h){
  triangle();ctx.strokeStyle='#ffffff';ctx.lineWidth=12;ctx.stroke();
  triangle();ctx.strokeStyle='#4d8b3c';ctx.lineWidth=4;ctx.stroke();
 }
-export async function safariPennants16x9(d){
- const img=await loadImage('/references/Bandeirolas%20Safari%20Personalizadas%20da%20Sofia.png');
- const letters=Array.from(String(d.name||'').normalize('NFC').toLocaleUpperCase('pt-BR').replace(/\s/g,''));
- letters.push(String(d.age)+' ANOS');
- const columns=3,rows=Math.ceil(letters.length/columns),pageH=1080;
- const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=pageH* Math.ceil(rows/2);
- const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
- letters.forEach((letter,i)=>{
-  const page=Math.floor(i/6),local=i%6,col=local%3,row=Math.floor(local/3);
-  flag(ctx,img,i,letter,48+col*630,page*pageH+24+row*525,555,490);
- });
- return canvas.toDataURL('image/png');
-}
 export function pennantSheet16x9(source){
  return loadImage(source).then(img=>{
   const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;
   const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,1920,1080);
-  const scale=Math.min(1920/img.naturalWidth,1080/img.naturalHeight);
+  const scale=Math.max(1920/img.naturalWidth,1080/img.naturalHeight);
   const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+  // Fill the complete 16:9 printable page; crop only the outer excess, never shrink the flags.
   ctx.drawImage(img,(1920-w)/2,(1080-h)/2,w,h);
   return canvas.toDataURL('image/png');
  });
