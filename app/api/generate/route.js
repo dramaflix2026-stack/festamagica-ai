@@ -22,6 +22,11 @@ export async function POST(request){
  try{
  const apiKey=process.env.OPENAI_API_KEY,code=process.env.PREVIEW_ACCESS_CODE;
  if(!apiKey||!code)return NextResponse.json({error:'Configure a chave da OpenAI e o código de teste.'},{status:503});
+ const authHeader=request.headers.get('authorization')||'';
+ const token=authHeader.startsWith('Bearer ')?authHeader.slice(7):'';
+ if(!token)return NextResponse.json({error:'Entre na sua conta para gerar artes.'},{status:401});
+ const authResponse=await fetch('https://gpgqusslfxqjmynwxjvm.supabase.co/auth/v1/user',{headers:{apikey:'sb_publishable_J3udgBeDVnB5QLOtx5WWvg_cOIbeWg8',Authorization:'Bearer '+token},signal:AbortSignal.timeout(10000)});
+ if(!authResponse.ok)return NextResponse.json({error:'Sessão inválida ou expirada. Entre novamente.'},{status:401});
  const d=await request.json();if(d.code!==code)return NextResponse.json({error:'Código de teste inválido.'},{status:403});
  const name=String(d.name||'').trim(),age=Number(d.age),piece=pieces[d.piece];
  if(!/^[\p{L}\p{M} '’-]{2,35}$/u.test(name)||!Number.isInteger(age)||age<1||age>99||!themeById[d.theme]||!piece)return NextResponse.json({error:'Dados inválidos.'},{status:400});
