@@ -1,3 +1,4 @@
+import {referenceFor} from './references';
 import {NextResponse} from 'next/server';
 export const runtime='nodejs';
 const themes={
@@ -31,13 +32,13 @@ export async function POST(request){
  const model=process.env.OPENAI_IMAGE_MODEL||'gpt-image-1-mini';
  // Optional approved visual reference, stored as a public asset in /public/references.
  // Never send private customer data to a remote reference URL.
- const referenceFile=d.theme==='safari'?'/references/safari-premium.png':null;
+ const referenceFile=referenceFor(d.theme,d.piece);
  let response;
  if(referenceFile){
   try{
    const origin=new URL(request.url).origin;
    const refResponse=await fetch(origin+referenceFile,{signal:AbortSignal.timeout(8000)});
-   if(refResponse.ok&&refResponse.headers.get('content-type')?.startsWith('image/')){
+   if(refResponse.ok&&/^image\/(png|jpeg|webp)/.test(refResponse.headers.get('content-type')||'')){
     const bytes=await refResponse.arrayBuffer();
     if(bytes.byteLength>0&&bytes.byteLength<10_000_000){
      const form=new FormData();
@@ -52,6 +53,7 @@ export async function POST(request){
   }catch(e){console.warn('Visual reference unavailable:',e?.message);}
  }
  if(!response){
+  console.info('Generating without internal reference:',d.theme,d.piece);
   response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json'},body:JSON.stringify({model,prompt,size:piece.size,n:1,quality:'low'}),signal:AbortSignal.timeout(115000)});
  }
  const j=await response.json();if(!response.ok){console.error('OpenAI artwork:',response.status,j?.error?.code,j?.error?.message);return NextResponse.json({error:'A OpenAI recusou a geração desta peça. Verifique os logs do Railway.'},{status:502});}
