@@ -1,5 +1,5 @@
-import {composePiece} from './compositor';
 'use client';
+import {composePiece} from './compositor';
 import {useState} from 'react';
 export const pieceKeys=['convite','topper','tags','bandeirolas','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',bandeirolas:'Bandeirolas',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
