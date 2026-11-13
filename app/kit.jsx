@@ -1,6 +1,6 @@
 'use client';
 import {useState} from 'react';
-import {pennantSheet16x9,safariPennants16x9} from './pennant-export';
+import {pennantSheet16x9} from './pennant-export';
 export const pieceKeys=['convite','topper','tags','bandeirolas','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',bandeirolas:'Bandeirolas',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
 export async function createKit(d,onProgress,onlyPiece=null){
@@ -8,11 +8,6 @@ export async function createKit(d,onProgress,onlyPiece=null){
  const selected=onlyPiece?[onlyPiece]:pieceKeys;
  for(let i=0;i<selected.length;i++){
   const piece=selected[i];onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/'+selected.length+')…');
-  if(piece==='bandeirolas'&&d.theme==='safari'){
-   kit[piece]=await safariPennants16x9(d);
-   onProgress?.('Bandeirolas personalizadas concluídas');
-   continue;
-  }
   const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece})});
   const j=await r.json();if(!r.ok)throw Error(labels[piece]+': '+(j.error||'Erro na geração'));
   kit[piece]=piece==='bandeirolas'?await pennantSheet16x9(j.image):j.image;onProgress?.('Arte '+(i+1)+' de '+selected.length+' concluída');
