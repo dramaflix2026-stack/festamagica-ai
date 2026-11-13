@@ -4,9 +4,9 @@ import {authRequest,currentUser,getSession,refreshSession,saveSession,signOut} f
 import Studio from './studio';
 export default function Plataforma(){
  const [user,setUser]=useState(null),[checking,setChecking]=useState(true),[mode,setMode]=useState('login'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
- useEffect(()=>{(async()=>{try{let s=getSession();if(!s)return;try{setUser(await currentUser(s.access_token))}catch{ s=await refreshSession(s);setUser(await currentUser(s.access_token))}}catch{signOut()}finally{setChecking(false)}})()},[]);
+ useEffect(()=>{(async()=>{try{const hash=new URLSearchParams(window.location.hash.slice(1));if(hash.get('access_token')){saveSession({access_token:hash.get('access_token'),refresh_token:hash.get('refresh_token'),expires_in:Number(hash.get('expires_in')||3600),token_type:'bearer'});window.history.replaceState(null,'',window.location.pathname)}let s=getSession();if(!s)return;try{setUser(await currentUser(s.access_token))}catch{ s=await refreshSession(s);setUser(await currentUser(s.access_token))}}catch{signOut()}finally{setChecking(false)}})()},[]);
  async function submit(e){e.preventDefault();setBusy(true);setError('');setNotice('');try{
-  if(mode==='register'){const j=await authRequest('signup',{email,password});if(j.access_token){saveSession(j);setUser(j.user)}else{setNotice('Cadastro criado! Confira seu e-mail para confirmar a conta antes de entrar.');setMode('login')}}
+  if(mode==='register'){const j=await authRequest('signup?redirect_to='+encodeURIComponent(window.location.origin+'/plataforma'),{email,password});if(j.access_token){saveSession(j);setUser(j.user)}else{setNotice('Cadastro criado! Confira seu e-mail para confirmar a conta antes de entrar.');setMode('login')}}
   else{const j=await authRequest('token?grant_type=password',{email,password});saveSession(j);setUser(j.user)}
  }catch(e){setError(e.message)}finally{setBusy(false)}}
  if(checking)return <main className="authShell"><p>Verificando acesso…</p></main>;
