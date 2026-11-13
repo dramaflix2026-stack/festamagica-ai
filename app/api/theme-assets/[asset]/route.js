@@ -3,8 +3,8 @@
 // https://openclipart.org/detail/301678/cute-dinosaur
 // https://openclipart.org/detail/245824/jeffy-the-dinosaur
 const sources={
- 'dino-green':'https://openclipart.org/download/301678/Cute-Dinosaur.svg',
- 'dino-pink':'https://openclipart.org/download/245824/jeffy-the-dinosaur.svg'
+ 'dino-green':'https://openclipart.org/download/301678',
+ 'dino-pink':'https://openclipart.org/download/245824'
 };
 export const revalidate=86400;
 export async function GET(_request,{params}){
