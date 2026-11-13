@@ -34,7 +34,7 @@ function flag(ctx,img,index,label,x,y,w,h){
 }
 export async function safariPennants16x9(d){
  const img=await loadImage('/references/Bandeirolas%20Safari%20Personalizadas%20da%20Sofia.png');
- const letters=Array.from(String(d.name||'').normalize('NFC').toLocaleUpperCase('pt-BR').replace(/\\s/g,''));
+ const letters=Array.from(String(d.name||'').normalize('NFC').toLocaleUpperCase('pt-BR').replace(/\s/g,''));
  letters.push(String(d.age)+' ANOS');
  const columns=3,rows=Math.ceil(letters.length/columns),pageH=1080;
  const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=pageH* Math.ceil(rows/2);
