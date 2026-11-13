@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import {getSession} from './auth-client';
 export const pieceKeys=['convite','topper','tags','boasvindas','digital'];
 const labels={convite:'Convite premium',topper:'Topper recortável',tags:'Tags de lembrancinhas',boasvindas:'Placa de boas-vindas',digital:'Arte para WhatsApp'};
 export async function createKit(d,onProgress){
@@ -7,7 +8,7 @@ export async function createKit(d,onProgress){
  for(let i=0;i<pieceKeys.length;i++){
   const piece=pieceKeys[i];
   onProgress?.('Criando '+labels[piece]+' ('+(i+1)+'/'+pieceKeys.length+')…');
-  const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...d,piece})});
+  const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(getSession()?.access_token||'')},body:JSON.stringify({...d,piece})});
   const j=await r.json();
   if(!r.ok)throw Error(labels[piece]+': '+(j.error||'Erro na geração'));
   kit[piece]=j.image;
