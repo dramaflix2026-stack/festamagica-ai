@@ -49,7 +49,7 @@ export async function POST(request){
  let response;
  if(referenceFile){
   try{
-   const referencePath=path.join(process.cwd(),'public',decodeURIComponent(referenceFile).replace(/^\\/+/,''));
+   const referencePath=path.join(process.cwd(),'public',decodeURIComponent(referenceFile).slice(1));
    const bytes=await readFile(referencePath);
    if(bytes.byteLength>0&&bytes.byteLength<10_000_000){
      const form=new FormData();
@@ -60,7 +60,6 @@ export async function POST(request){
      form.append('image',new Blob([bytes],{type:referencePath.toLowerCase().endsWith('.jpg')||referencePath.toLowerCase().endsWith('.jpeg')?'image/jpeg':'image/png'}),'reference.png');
      response=await fetch('https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:'Bearer '+apiKey},body:form,signal:AbortSignal.timeout(115000)});
     }
-   }
   }catch(e){console.warn('Visual reference unavailable:',e?.message);}
  }
  if(!response){
