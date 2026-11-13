@@ -18,7 +18,7 @@ export default function SheetTester({theme='dinossauros',name,age,date,time,venu
      canvas.getContext('2d').drawImage(img,Math.round(img.naturalWidth*rx),Math.round(img.naturalHeight*ry),canvas.width,canvas.height,0,0,canvas.width,canvas.height);
      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
      if(!blob)throw Error('Falha ao recortar imagem');
-     return {name:r.label,key:r.key,url:URL.createObjectURL(blob),filename:theme+'-'String(index+1).padStart(2,'0')+'.png',width:canvas.width,height:canvas.height};
+     return {name:r.label,key:r.key,url:URL.createObjectURL(blob),filename:theme+'-'+String(index+1).padStart(2,'0')+'.png',width:canvas.width,height:canvas.height};
     }));
     setParts(previous=>{previous.forEach(p=>URL.revokeObjectURL(p.url));return crops});
    }
