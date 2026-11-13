@@ -2,6 +2,7 @@
 import {useState} from 'react';
 import KitGallery,{createKit} from '../kit';
 import FreePreview from '../free-preview';
+import SheetTester from '../sheet-tester';
 import {partyThemes,partyCategories} from '../themes';
 
 function addText(background,details){
@@ -59,6 +60,7 @@ export default function Studio({onGenerated}){
  <div className="field"><label htmlFor="hora">Horário (opcional)</label><input id="hora" type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
  <div className="field"><label htmlFor="local">Local (opcional)</label><input id="local" maxLength={80} placeholder="Ex.: Salão de festas" value={venue} onChange={e=>setVenue(e.target.value)}/></div>
  <button type="button" className="outline" style={{width:'100%',margin:'8px 0 18px'}} onClick={()=>setShowFreePreview(v=>!v)}>{showFreePreview?'Ocultar prévia gratuita':'👁️ Pré-visualizar sem gastar IA — grátis'}</button>
+ {theme==='dinossauros'&&<SheetTester/>}
  <div className="price">🎁 Kit de lançamento: <strong>R$ 39,90</strong><div className="muted">Checkout ainda não habilitado. Estamos validando as cinco artes antes do lançamento.</div></div>
  <div className="field"><label htmlFor="code">Código de teste privado</label><input id="code" required type="password" autoComplete="off" placeholder="Código configurado no Railway" value={code} onChange={e=>setCode(e.target.value)}/></div>
  <button type="submit" className="btn" style={{width:'100%'}} disabled={loading}>{loading?(progress||'Criando sua arte… ✨'):'Gerar kit de teste ✨'}</button>
